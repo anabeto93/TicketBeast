@@ -1,7 +1,12 @@
 FROM php:7.2-apache
-LABEL maintainer="Richard Anabeto Opoku"
+LABEL maintainer="Richard Anabeto Opoku <anabeto93@gmail.com>"
 
 RUN apt-get update
+
+# 0.0 Adding SSL certs
+COPY ticketbeast.crt /etc/apache2/ssl/ticketbeast.crt
+COPY ticketbeast.key /etc/apache2/ssl/ticketbeast.key
+COPY ticketbeast.conf /etc/apache2/sites-enabled/ticketbeast.app.conf
 
 # 1. development packages
 RUN apt-get install -y \
@@ -53,3 +58,14 @@ ARG uid
 RUN useradd -G www-data,root -u $uid -d /home/devuser devuser
 RUN mkdir -p /home/devuser/.composer && \
     chown -R devuser:devuser /home/devuser
+
+# 7. Restart apache but first enabling ssl
+RUN a2enmod rewrite
+RUN a2enmod ssl
+RUN a2ensite ticketbeast.app.conf
+RUN service apache2 restart
+
+EXPOSE 80
+EXPOSE 443
+
+HEALTHCHECK --interval=5s --timeout=3s --retries=3 CMD curl -f http://localhost || exit 1

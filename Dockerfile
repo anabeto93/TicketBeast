@@ -4,8 +4,8 @@ LABEL maintainer="Richard Anabeto Opoku <anabeto93@gmail.com>"
 RUN apt-get update
 
 # 0.0 Adding SSL certs
-COPY ticketbeast.crt /etc/apache2/ssl/ticketbeast.crt
-COPY ticketbeast.key /etc/apache2/ssl/ticketbeast.key
+COPY ticketbeast.app.crt /etc/apache2/ssl/ticketbeast.crt
+COPY ticketbeast.app.key /etc/apache2/ssl/ticketbeast.key
 COPY ticketbeast.conf /etc/apache2/sites-enabled/ticketbeast.app.conf
 
 # 1. development packages
@@ -62,7 +62,7 @@ RUN mkdir -p /home/devuser/.composer && \
 # 7. Restart apache but first enabling ssl
 RUN a2enmod rewrite
 RUN a2enmod ssl
-RUN a2ensite ticketbeast.app.conf
+# RUN a2ensite ticketbeast.app.conf
 RUN service apache2 restart
 
 EXPOSE 80

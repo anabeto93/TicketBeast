@@ -1,12 +1,12 @@
 version: '3.5'
 
 services:
-  laravel-app:
+  ticketbeast:
     build:
       context: '.'
       args:
         uid: ${UID}
-    container_name: laravel-app
+    container_name: ticketbeast
     ports:
       - 8000:80
     environment:

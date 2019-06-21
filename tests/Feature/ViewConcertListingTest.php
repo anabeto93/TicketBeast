@@ -16,7 +16,7 @@ class ViewConcertListingTest extends TestCase
     /**
      * @test
      */
-    function user_can_view_a_convert_listing() 
+    function user_can_view_a_concert_listing()
     {
         //Arrange
         //Given that we have a concert listing
@@ -52,5 +52,7 @@ class ViewConcertListingTest extends TestCase
         $response->assertSee('Greater Accra');
         $response->assertSee('00233');
         $response->assertSee('For tickets, call (233203833803).');
+
+        $this->assertDatabaseHas('concerts', ['title' => 'The Red Chord']);
     }
 }

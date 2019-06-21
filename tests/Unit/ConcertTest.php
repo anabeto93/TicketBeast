@@ -17,7 +17,7 @@ class ConcertTest extends TestCase
     function can_get_formatted_date()
     {
         //Create a concert with a known date
-        $concert = factory(Concert::class)->create([
+        $concert = factory(Concert::class)->make([
             'date' => Carbon::parse('2019-06-21 1:03am'),
         ]);
 
@@ -26,5 +26,48 @@ class ConcertTest extends TestCase
 
         //Verify date is formatted as expected
         $this->assertEquals($date, 'June 21, 2019');
+    }
+
+    /**
+     * @test
+     */
+    function can_get_formatted_start_time() 
+    {
+        $concert = factory(Concert::class)->make([
+            'date' => Carbon::parse('2019-06-21 10:00pm'),
+        ]);
+
+        $this->assertEquals('10:00pm', $concert->formatted_start_time);
+    }
+
+    /**
+     * @test
+     */
+    function can_get_ticket_price_in_float()
+    {
+        $concert = factory(Concert::class)->make([
+            'ticket_price' => 7850
+        ]);
+
+        $this->assertEquals(78.50, $concert->ticket_price_in_float);
+    }
+
+    /**
+     * @test
+     */
+    function concerts_with_a_published_at_date_are_published()
+    {
+        $publishedConcertA = factory(Concert::class)->create([
+            'published_at' => Carbon::parse('-1 week')]);
+        $publishedConcertB = factory(Concert::class)->create([
+            'published_at' => Carbon::parse('-1 week')]);
+        $unpublishedConcert = factory(Concert::class)->create([
+            'published_at' => null]);
+
+        $publishedConcerts = Concert::published()->get();
+
+        $this->assertTrue($publishedConcerts->contains($publishedConcertA));
+        $this->assertTrue($publishedConcerts->contains($publishedConcertB));
+        $this->assertFalse($publishedConcerts->contains($unpublishedConcert));
     }
 }

@@ -16,11 +16,11 @@ class ViewConcertListingTest extends TestCase
     /**
      * @test
      */
-    function user_can_view_a_concert_listing()
+    function user_can_view_a_published_concert_listing()
     {
         //Arrange
         //Given that we have a concert listing
-        $concert = Concert::create([
+        $concert = factory(Concert::class)->states('published')->create([
             'title' => 'The Red Chord',
             'subtitle' => 'with Animosity and Lethargy',
             'date' => Carbon::parse('June 30, 2019 9:00am'),
@@ -30,7 +30,7 @@ class ViewConcertListingTest extends TestCase
             'city' => 'Accra',
             'state' => 'Greater Accra',
             'zip' => '00233',
-            'additional_information' => 'For tickets, call (233203833803).'
+            'additional_information' => 'For tickets, call (233203833803).',
         ]);
 
         //Act
@@ -54,5 +54,19 @@ class ViewConcertListingTest extends TestCase
         $response->assertSee('For tickets, call (233203833803).');
 
         $this->assertDatabaseHas('concerts', ['title' => 'The Red Chord']);
+    }
+
+    /**
+     * @test
+     */
+    function user_cannot_view_unpublished_concerts()
+    {
+        $concert = factory(Concert::class)->states('unpublished')->create([
+        ]);
+
+        //When we view or access the concert listing
+        $response = $this->get('/concerts/'.$concert->id);
+
+        $response->assertStatus(404);//Shouldn't be available
     }
 }

@@ -12,7 +12,10 @@
 */
 
  Route::get('/', function () {
+     //\Log::info('Just creating the log file secof a visit');
      return view('welcome');
  });
 
 Route::get('/concerts/{id}', 'ConcertsController@show');
+
+Route::post('/concerts/{id}/orders', 'ConcertOrdersController@store');

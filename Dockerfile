@@ -68,4 +68,4 @@ RUN service apache2 restart
 EXPOSE 80
 EXPOSE 443
 
-HEALTHCHECK --interval=5s --timeout=3s --retries=3 CMD curl -f http://localhost || exit 1
+HEALTHCHECK --interval=30s --timeout=3s --retries=3 CMD curl -f http://localhost || exit 1

@@ -28,4 +28,20 @@ class Concert extends Model
     {
         return $query->whereNotNull('published_at');
     }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function orderTickets($email, $ticket_quantity)
+    {
+        $order = $this->orders()->create(['email' => $email]);
+
+        foreach(range(1, $ticket_quantity) as $i) {
+            $order->tickets()->create([]);
+        }
+
+        return $order;
+    }
 }

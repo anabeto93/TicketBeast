@@ -32,6 +32,15 @@ class PurchaseTicketsTest extends TestCase
         return $this->json('POST', "/concerts/{$concert->id}/orders", $params);
     }
 
+    private function assertValidationError($response, $field_name)
+    {
+        $response->assertStatus(422);
+
+        $response->assertJsonStructure([
+            'message', 'errors' => [$field_name => []]
+        ]);
+    }
+
     /**
      * @test
      */
@@ -75,11 +84,7 @@ class PurchaseTicketsTest extends TestCase
             'payment_token' => $this->paymentGateway->getValidTestToken(),
         ]);
 
-        $response->assertStatus(422);
-
-        $response->assertJsonStructure([
-            'message', 'errors' => ['email' => []]
-        ]);
+        $this->assertValidationError($response, 'email');
     }
 
     /**
@@ -94,11 +99,7 @@ class PurchaseTicketsTest extends TestCase
             'payment_token' => $this->paymentGateway->getValidTestToken(),
         ]);
 
-        $response->assertStatus(422);
-
-        $response->assertJsonStructure([
-            'message', 'errors' => ['ticket_quantity' => []]
-        ]);
+        $this->assertValidationError($response, 'ticket_quantity');
     }
 
     /**
@@ -113,10 +114,6 @@ class PurchaseTicketsTest extends TestCase
             'ticket_quantity' => 2,
         ]);
 
-        $response->assertStatus(422);
-
-        $response->assertJsonStructure([
-            'message', 'errors' => ['payment_token' => []]
-        ]);
+        $this->assertValidationError($response, 'payment_token');
     }
 }

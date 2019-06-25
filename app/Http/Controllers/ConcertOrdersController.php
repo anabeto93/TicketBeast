@@ -20,7 +20,9 @@ class ConcertOrdersController extends Controller
     public function store($id) 
     {
         $this->validate(request(), [
-            'email' => 'bail|required'
+            'email' => 'bail|required',
+            'ticket_quantity' => 'bail|required',
+            'payment_token' => 'bail|required'
         ]);
 
         $concert = Concert::find($id);

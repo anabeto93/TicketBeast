@@ -19,22 +19,27 @@ class ConcertOrdersController extends Controller
 
     public function store($id) 
     {
+        $concert = Concert::published()->findOrFail($id);
+
         $this->validate(request(), [
-            'email' => 'bail|required',
-            'ticket_quantity' => 'bail|required',
+            'email' => 'bail|required|email',
+            'ticket_quantity' => 'bail|required|integer|min:1',
             'payment_token' => 'bail|required'
         ]);
 
-        $concert = Concert::find($id);
+        try{
 
-        //Charging the customer
-        $this->paymentGateway
-            ->charge(request('ticket_quantity') * $concert->ticket_price,
-            request('payment_token'));
+            //Charging the customer
+            $this->paymentGateway
+                ->charge(request('ticket_quantity') * $concert->ticket_price,
+                    request('payment_token'));
 
-        //Creating the order
-        $order = $concert->orderTickets(request('email'), request('ticket_quantity'));
+            //Creating the order
+            $order = $concert->orderTickets(request('email'), request('ticket_quantity'));
 
-        return response()->json([], 201);
+            return response()->json([], 201);
+        }catch(\App\Billing\PaymentFailedException $e) {
+            return response()->json([], 422);
+        }
     }
 }

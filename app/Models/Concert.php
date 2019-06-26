@@ -43,16 +43,28 @@ class Concert extends Model
     public function orderTickets($email, $ticket_quantity)
     {
         //get existing tickets
-        $tickets = $this->tickets()->available()
-            ->take($ticket_quantity)->get();
+        $tickets = $this->findTickets($ticket_quantity);
 
-        if($tickets->count() < $ticket_quantity) {
+        return $this->createOrder($email, $tickets);
+    }
+
+    public function findTickets($quantity)
+    {
+        $tickets = $this->tickets()->available()
+            ->take($quantity)->get();
+
+        if($tickets->count() < $quantity) {
             throw new NotEnoughTicketsException;
         }
 
+        return $tickets;
+    }
+
+    public function createOrder($email, $tickets)
+    {
         $order = $this->orders()->create([
             'email' => $email,
-            'amount' => $ticket_quantity * $this->ticket_price,
+            'amount' => $tickets->count() * $this->ticket_price,
         ]);
 
         foreach($tickets as $ticket) {

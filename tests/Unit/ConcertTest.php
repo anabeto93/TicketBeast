@@ -105,8 +105,6 @@ class ConcertTest extends TestCase
      */
     function tickets_remaining_does_not_include_those_associated_with_an_order()
     {
-        $this->disableExceptionHandling();
-
         $concert = factory(Concert::class)->create();
 
         $concert->addTickets(27);
@@ -145,7 +143,6 @@ class ConcertTest extends TestCase
      */
     function cannot_order_tickets_which_are_already_purchased()
     {
-        $this->disableExceptionHandling();
         $concert = factory(Concert::class)->create();
 
         $concert->addTickets(7);
@@ -169,6 +166,20 @@ class ConcertTest extends TestCase
         }
 
         $this->fail('Order succeeded even when there were not enough tickets remaining');
+    }
+
+    /**
+     * @test
+     */
+    function can_find_tickets()
+    {
+        $concert = factory(Concert::class)->create();
+
+        $concert->addTickets(7);
+
+        $tickets = $concert->findTickets(4);//anything below or equal to the added quantity
+
+        $this->assertEquals($tickets->count(), 4);
     }
 
 

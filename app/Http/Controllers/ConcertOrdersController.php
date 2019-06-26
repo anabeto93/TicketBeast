@@ -29,30 +29,19 @@ class ConcertOrdersController extends Controller
         ]);
 
         try{
-
-            //Creating the order
-            $order = $concert->orderTickets(request('email'), request('ticket_quantity'));
+            //Find some tickets lying around
+            $tickets = $concert->findTickets(request('ticket_quantity'));
 
             //Charging the customer
             $this->paymentGateway
                 ->charge(request('ticket_quantity') * $concert->ticket_price,
                     request('payment_token'));
 
-            /*$result = [
-                'email' => $order->email,
-                'ticket_quantity' => $order->ticket_quantity(),
-                'amount' => $this->paymentGateway->totalCharges()
-            ];
+            //Creating the order
+            $order = $concert->createOrder(request('email'), $tickets);
 
-            return response()->json($result, 201);*/
             return response()->json($order->toArray(), 201);
         }catch(\App\Billing\PaymentFailedException $e) {
-            Log::info('The order to cancel on failed payment');
-            foreach($order->tickets as $ticket) {
-                Log::debug($ticket);
-            }
-            $order->cancel();//cancel the order if payment couldn't be completed successfully
-
             return response()->json([], 422);
         }catch(NotEnoughTicketsException $e) {
             return response()->json([], 422);

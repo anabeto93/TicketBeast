@@ -62,6 +62,13 @@ class PurchaseTicketsTest extends TestCase
         //Assert that ticket has been created
         $response->assertStatus(201);
 
+        //assert against the expected response if it has been created
+        $response->assertJson( [
+                "email" => "test@admin.com",
+                "ticket_quantity" => 2,
+                "amount" => 3198,
+        ]);
+
         //Ensure customer was charged
         $this->assertEquals(3198, $this->paymentGateway->totalCharges());
 

@@ -17,9 +17,28 @@ class Order extends Model
     {
         foreach ($this->tickets as $ticket) {
             $ticket->release();
-           // $ticket->update(['order_id' => null]);//dissociate
         }
 
         $this->delete();//delete it after releasing the tickets
+    }
+
+    public function ticket_quantity()
+    {
+        return $this->tickets()->count();
+    }
+
+    public function concert()
+    {
+        return $this->belongsTo(Concert::class);
+    }
+
+    public function toArray()
+    {
+        return [
+            'email' => $this->email,
+            'ticket_quantity' => $this->ticket_quantity(),
+            'amount' => $this->amount,
+//            'amount' => $this->ticket_quantity() * $this->concert->ticket_price,
+        ];
     }
 }

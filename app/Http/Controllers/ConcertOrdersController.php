@@ -38,7 +38,14 @@ class ConcertOrdersController extends Controller
                 ->charge(request('ticket_quantity') * $concert->ticket_price,
                     request('payment_token'));
 
-            return response()->json([], 201);
+            /*$result = [
+                'email' => $order->email,
+                'ticket_quantity' => $order->ticket_quantity(),
+                'amount' => $this->paymentGateway->totalCharges()
+            ];
+
+            return response()->json($result, 201);*/
+            return response()->json($order->toArray(), 201);
         }catch(\App\Billing\PaymentFailedException $e) {
             Log::info('The order to cancel on failed payment');
             foreach($order->tickets as $ticket) {

@@ -22,7 +22,7 @@ class PurchaseTicketsTest extends TestCase
 
         $this->paymentGateway = new FakePaymentGateway();
 
-        $this->withoutMiddleware([VerifyCsrfToken::class]);
+        //$this->withoutMiddleware([VerifyCsrfToken::class]);
 
         $this->app->instance(PaymentGateway::class, $this->paymentGateway);
     }
@@ -50,6 +50,8 @@ class PurchaseTicketsTest extends TestCase
         $concert = factory(Concert::class)->state('published')->create([
             'ticket_price' => 1599
         ]);
+
+        $concert->addTickets(5); //more than the 2 that will be bought
 
         $response = $this->orderTickets($concert, [
             'email' => 'test@admin.com',
@@ -80,6 +82,8 @@ class PurchaseTicketsTest extends TestCase
             'ticket_price' => 670
         ]);
 
+        $concert->addTickets(30);//10 more than necessary
+
         $response = $this->orderTickets($concert, [
             'email' => 'cheap@girls.com',
             'ticket_quantity' => 20,
@@ -106,9 +110,11 @@ class PurchaseTicketsTest extends TestCase
     {
         $concert = factory(Concert::class)->state('published')->create();
 
+        $concert->addTickets(15);
+
         $response = $this->orderTickets($concert, [
             'email' => 'fake@user.com',
-            'ticket_quantity' => 2,
+            'ticket_quantity' => 4,
             'payment_token' => 'fake_invalid_token_hahaha',
         ]);
 
@@ -196,5 +202,30 @@ class PurchaseTicketsTest extends TestCase
         ]);
 
         $this->assertValidationError($response, 'payment_token');
+    }
+
+    /**
+     * @test
+     */
+    function cannot_buy_more_tickets_than_is_available()
+    {
+        $this->disableExceptionHandling();
+
+        $concert = factory(Concert::class)->state('published')->create();
+
+        $concert->addTickets(58);
+
+        $response = $this->orderTickets($concert, [
+            'email' => 'ticket@quantity.com',
+            'ticket_quantity' => 60,
+            'payment_token' => $this->paymentGateway->getValidTestToken(),
+        ]);
+
+        $response->assertStatus(422); //cannot buy more than is available
+
+        $order = $concert->orders()->where('email','ticket@quantity.com')->first();
+        $this->assertNull($order);
+        $this->assertEquals(0, $this->paymentGateway->totalCharges());
+        $this->assertEquals(58, $concert->remainingTickets());
     }
 }

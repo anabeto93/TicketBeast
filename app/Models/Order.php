@@ -42,11 +42,11 @@ class Order extends Model
         ];
     }
 
-    public static function forTickets($tickets, $email, $amount = null)
+    public static function forTickets($tickets, $email, $amount)
     {
         $order = self::create([
             'email' => $email,
-            'amount' => $amount === null ? $tickets->sum('price') : $amount,
+            'amount' => $amount,
             //ticket prices can vary, add them individually if no amount supplied
         ]);
 

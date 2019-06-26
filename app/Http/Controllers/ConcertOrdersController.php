@@ -39,7 +39,7 @@ class ConcertOrdersController extends Controller
                 ->charge($tickets->sum('price'), request('payment_token'));
 
             //Creating the order
-            $order = Order::forTickets($tickets, request('email'));
+            $order = Order::forTickets($tickets, request('email'), $tickets->sum('price'));
 
             return response()->json($order->toArray(), 201);
         }catch(PaymentFailedException $e) {

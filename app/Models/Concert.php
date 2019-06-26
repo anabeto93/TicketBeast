@@ -64,7 +64,7 @@ class Concert extends Model
     {
         $order = Order::create([
             'email' => $email,
-            'amount' => $tickets->count() * $this->ticket_price,
+            'amount' => $tickets->sum('price'),//ticket prices can vary, add individually
         ]);
 
         foreach($tickets as $ticket) {

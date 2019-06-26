@@ -11,7 +11,7 @@ $factory->define(Concert::class, function (Faker $faker) {
         'title' => $faker->realText(100),
         'subtitle' => $faker->realText(),
         'date' => Carbon::parse('+2 weeks'),
-        'ticket_price' => rand(100, 9999),
+        'ticket_price' => rand(1000, 9999),
         'venue' => $faker->name,
         'venue_address' => $faker->address,
         'city' => $faker->city,

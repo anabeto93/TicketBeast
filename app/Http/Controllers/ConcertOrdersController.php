@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Billing\PaymentFailedException;
 use App\Billing\PaymentGateway;
 use App\Exceptions\NotEnoughTicketsException;
 use App\Models\Concert;
@@ -35,14 +36,13 @@ class ConcertOrdersController extends Controller
 
             //Charging the customer
             $this->paymentGateway
-                ->charge($tickets->sum('price'),
-                    request('payment_token'));
+                ->charge($tickets->sum('price'), request('payment_token'));
 
             //Creating the order
             $order = Order::forTickets($tickets, request('email'));
 
             return response()->json($order->toArray(), 201);
-        }catch(\App\Billing\PaymentFailedException $e) {
+        }catch(PaymentFailedException $e) {
             return response()->json([], 422);
         }catch(NotEnoughTicketsException $e) {
             return response()->json([], 422);

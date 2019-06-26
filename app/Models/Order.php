@@ -41,4 +41,18 @@ class Order extends Model
 //            'amount' => $this->ticket_quantity() * $this->concert->ticket_price,
         ];
     }
+
+    public static function forTickets($tickets, $email)
+    {
+        $order = self::create([
+            'email' => $email,
+            'amount' => $tickets->sum('price'),//ticket prices can vary, add individually
+        ]);
+
+        foreach($tickets as $ticket) {
+            $order->tickets()->save($ticket);//associate the two
+        }
+
+        return $order;
+    }
 }

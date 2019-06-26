@@ -18,7 +18,7 @@ class OrderTest extends TestCase
      */
     function convert_order_to_array_works()
     {
-        $this->disableExceptionHandling();
+        //$this->disableExceptionHandling();
 
         $concert = factory(Concert::class)->create([
             'ticket_price' => 100
@@ -51,5 +51,27 @@ class OrderTest extends TestCase
 
         $this->assertEquals(15, $concert->remainingTickets());
         $this->assertNull(Order::find($order->id));
+    }
+
+    /**
+     * @test
+     */
+    function can_create_order_given_tickets_and_an_email()
+    {
+        $concert = factory(Concert::class)->create([
+            'ticket_price' => 2250
+        ]);
+
+        $concert->addTickets(15);
+
+        $this->assertEquals(15, $concert->remainingTickets());
+
+        $order = Order::forTickets($concert->findTickets(10), 'order@tickets.com');
+
+        $this->assertEquals('order@tickets.com', $order->email);
+
+        $this->assertEquals(10, $order->ticket_quantity());
+        $this->assertEquals(22500, $order->amount);
+        $this->assertEquals(5, $concert->remainingTickets());
     }
 }

@@ -193,10 +193,12 @@ class ConcertTest extends TestCase
 
         $this->assertEquals(5, $concert->remainingTickets());
 
-        $reservation = $concert->reserveTickets(2);
+        $reservation = $concert->reserveTickets(2,'vip@me.com');
         $this->assertCount(2, $reservation->tickets());
 
         $this->assertEquals(3, $concert->remainingTickets());
+
+        $this->assertEquals('vip@me.com', $reservation->email());
     }
 
     /**
@@ -209,7 +211,7 @@ class ConcertTest extends TestCase
 
         $this->assertEquals(2, $concert->remainingTickets());
 
-        $reservation = $concert->reserveTickets(1);
+        $reservation = $concert->reserveTickets(1,'you@too.com');
 
         $this->assertTrue($reservation instanceof Reservation);
         $this->assertEquals(1, $concert->remainingTickets());
@@ -226,7 +228,7 @@ class ConcertTest extends TestCase
         $concert->orderTickets('rich@main.com', 3);
 
         try {
-            $concert->reserveTickets(4);//meanwhile only 2 left
+            $concert->reserveTickets(4,'greedy@main.com');//meanwhile only 2 left
         }catch (NotEnoughTicketsException $e) {
             $this->assertEquals(2, $concert->remainingTickets());
 
@@ -242,12 +244,12 @@ class ConcertTest extends TestCase
     function cannot_reserve_already_reserved_tickets()
     {
         $concert = factory(Concert::class)->create();
-        $concert->addTickets(4);
+        $concert->addTickets(3);
 
-        $concert->reserveTickets(3);
+        $concert->reserveTickets(2,'someone@my.business');
 
         try {
-            $concert->reserveTickets(3);//meanwhile only 2 left
+            $concert->reserveTickets(3,'someone@my.business');//meanwhile only 2 left
         }catch (NotEnoughTicketsException $e) {
             $this->assertEquals(1, $concert->remainingTickets());
 
@@ -263,9 +265,9 @@ class ConcertTest extends TestCase
     function can_check_concert_has_order_for_customer_given_email()
     {
         $concert = factory(Concert::class)->create();
-        $concert->addTickets(5);
+        $concert->addTickets(2);
 
-        $concert->orderTickets('has@order.com', 3);
+        $concert->orderTickets('has@order.com', 1);
 
         $this->assertTrue($concert->hasOrderFor('has@order.com'));
     }

@@ -22,7 +22,7 @@ class ReservationTestTest extends TestCase
             (object) ['price' => 1500],
         ]);
 
-        $reservation = new Reservation($tickets);
+        $reservation = new Reservation($tickets,'just@me.com');
 
         $this->assertEquals(10500, $reservation->totalCost());
     }
@@ -40,7 +40,7 @@ class ReservationTestTest extends TestCase
 
         $tickets = collect($tickets);
 
-        $reservation = new Reservation($tickets);
+        $reservation = new Reservation($tickets,'come@on.com');
 
         $reservation->cancel();
 
@@ -61,8 +61,26 @@ class ReservationTestTest extends TestCase
             (object) ['price' => 1500],
         ]);
 
-        $reservation = new Reservation($tickets);
+        $reservation = new Reservation($tickets,'hmm@tired.com');
 
         $this->assertEquals($tickets, $reservation->tickets());
+    }
+
+    /**
+     * @test
+     */
+    function can_get_customer_email_address_from_reservation()
+    {
+        $tickets = collect([
+            (object) ['price' => 2000],
+            (object) ['price' => 2000],
+            (object) ['price' => 5000],
+            (object) ['price' => 1500],
+        ]);
+
+        $reservation = new Reservation($tickets,'hmm@tired.com');
+
+        $this->assertEquals($tickets, $reservation->tickets());
+        $this->assertEquals('hmm@tired.com', $reservation->email());
     }
 }

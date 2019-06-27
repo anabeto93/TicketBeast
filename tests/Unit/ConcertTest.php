@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use App\Exceptions\NotEnoughTicketsException;
 use App\Models\Concert;
+use App\Models\Reservation;
 use Carbon\Carbon;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -192,10 +193,26 @@ class ConcertTest extends TestCase
 
         $this->assertEquals(5, $concert->remainingTickets());
 
-        $reserveTickets = $concert->reserveTickets(2);
-        $this->assertCount(2, $reserveTickets);
+        $reservation = $concert->reserveTickets(2);
+        $this->assertCount(2, $reservation->tickets());
 
         $this->assertEquals(3, $concert->remainingTickets());
+    }
+
+    /**
+     * @test
+     */
+    function a_reservation_is_returned_when_concert_tickets_are_reserved()
+    {
+        $concert = factory(Concert::class)->create();
+        $concert->addTickets(2);
+
+        $this->assertEquals(2, $concert->remainingTickets());
+
+        $reservation = $concert->reserveTickets(1);
+
+        $this->assertTrue($reservation instanceof Reservation);
+        $this->assertEquals(1, $concert->remainingTickets());
     }
 
     /**

@@ -32,11 +32,7 @@ class ConcertOrdersController extends Controller
         ]);
 
         try{
-            //Find some tickets lying around
-            $tickets = $concert->reserveTickets(request('ticket_quantity'));
-
-            //Make a reservation
-            $reservation = new Reservation($tickets);
+            $reservation = $concert->reserveTickets(request('ticket_quantity'));
 
             //Charging the customer
             $this->paymentGateway

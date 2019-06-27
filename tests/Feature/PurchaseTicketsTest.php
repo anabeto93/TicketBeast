@@ -29,7 +29,13 @@ class PurchaseTicketsTest extends TestCase
 
     private function orderTickets($concert, $params)
     {
-        return $this->json('POST', "/concerts/{$concert->id}/orders", $params);
+        $savedRequest = $this->app['request'];
+
+        $response = $this->json('POST', "/concerts/{$concert->id}/orders", $params);
+        //restore requestA
+        $this->app['request'] = $savedRequest;
+
+        return $response;
     }
 
     private function assertValidationError($response, $field_name)
@@ -248,16 +254,11 @@ class PurchaseTicketsTest extends TestCase
 
         $this->paymentGateway->beforeFirstCharge(function ($paymentGateway) use($concert) {
 
-            $requestA = $this->app['request'];
-
             $responseB = $this->orderTickets($concert, [
                 'email' => 'personB@admin.com',
                 'ticket_quantity' => 4,
                 'payment_token' => $paymentGateway->getValidTestToken(),
             ]);
-
-            //restore requestA
-            $this->app['request'] = $requestA;
 
             $responseB->assertStatus(422); //cannot buy more than is available
 

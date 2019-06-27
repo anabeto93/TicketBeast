@@ -13,15 +13,6 @@ class Order extends Model
         return $this->hasMany(Ticket::class);
     }
 
-//    public function cancel()
-//    {
-//        foreach ($this->tickets as $ticket) {
-//            $ticket->release();
-//        }
-//
-//        $this->delete();//delete it after releasing the tickets
-//    }
-
     public function ticket_quantity()
     {
         return $this->tickets()->count();
@@ -38,7 +29,6 @@ class Order extends Model
             'email' => $this->email,
             'ticket_quantity' => $this->ticket_quantity(),
             'amount' => $this->amount,
-//            'amount' => $this->ticket_quantity() * $this->concert->ticket_price,
         ];
     }
 

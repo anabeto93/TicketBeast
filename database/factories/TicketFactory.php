@@ -12,3 +12,9 @@ $factory->define(Ticket::class, function (Faker $faker) {
         }
     ];
 });
+
+$factory->state(Ticket::class,'reserved', function($faker) {
+    return [
+        'reserved_at' => \Carbon\Carbon::parse('-1 day'),
+    ];
+});

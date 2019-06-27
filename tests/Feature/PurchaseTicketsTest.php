@@ -216,8 +216,6 @@ class PurchaseTicketsTest extends TestCase
      */
     function cannot_buy_more_tickets_than_is_available()
     {
-        $this->disableExceptionHandling();
-
         $concert = factory(Concert::class)->state('published')->create();
 
         $concert->addTickets(58);
@@ -234,5 +232,66 @@ class PurchaseTicketsTest extends TestCase
         $this->assertNull($order);
         $this->assertEquals(0, $this->paymentGateway->totalCharges());
         $this->assertEquals(58, $concert->remainingTickets());
+    }
+
+    /**
+     * @test
+     */
+    function cannot_purchase_tickets_another_has_reserved()
+    {
+        $this->disableExceptionHandling();
+
+        $concert = factory(Concert::class)->state('published')->create([
+            'ticket_price' => 1500
+        ]);
+        $concert->addTickets(5);
+
+        $this->paymentGateway->beforeFirstCharge(function ($paymentGateway) use($concert) {
+
+            $requestA = $this->app['request'];
+
+            $responseB = $this->orderTickets($concert, [
+                'email' => 'personB@admin.com',
+                'ticket_quantity' => 4,
+                'payment_token' => $paymentGateway->getValidTestToken(),
+            ]);
+
+            //restore requestA
+            $this->app['request'] = $requestA;
+
+            $responseB->assertStatus(422); //cannot buy more than is available
+
+            $order = $concert->orders()->where('email','personB@admin.com')->first();
+            $this->assertNull($order);
+            $this->assertEquals(0, $this->paymentGateway->totalCharges());
+        });
+
+        $responseA = $this->orderTickets($concert, [
+            'email' => 'personA@admin.com',
+            'ticket_quantity' => 3,
+            'payment_token' => $this->paymentGateway->getValidTestToken(),
+        ]);
+
+        //Assert that ticket has been created
+        $responseA->assertStatus(201);
+
+        //dd($concert->orders()->first()->toArray());
+
+        //assert against the expected response if it has been created
+        $responseA->assertJson( [
+            "email" => "personA@admin.com",
+            "ticket_quantity" => 3,
+            "amount" => 4500,
+        ]);
+
+        //Ensure customer was charged
+        $this->assertEquals(4500, $this->paymentGateway->totalCharges());
+
+        //Ensure an order exists for the customer
+        $order = $concert->orders()->where('email', 'personA@admin.com')->first();
+
+        $this->assertNotNull($order);
+
+        $this->assertEquals(3, $order->tickets()->count());
     }
 }

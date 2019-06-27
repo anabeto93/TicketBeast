@@ -2,7 +2,6 @@
 
 namespace Tests\Unit;
 
-use App\Models\Concert;
 use App\Models\Reservation;
 use App\Models\Ticket;
 use Mockery;
@@ -36,11 +35,7 @@ class ReservationTestTest extends TestCase
         $tickets =[];
 
         foreach(range(0, 2) as $i) {
-            /*$tickets[$i] = Mockery::mock(Ticket::class, function($mock) {
-                $mock->shouldReceive('release')->once();
-            });*/
-            $tickets[$i] = Mockery::mock(Ticket::class)
-                ->shouldReceive('release')->once()->getMock();
+            $tickets[$i] = Mockery::spy(Ticket::class);
         }
 
         $tickets = collect($tickets);
@@ -48,5 +43,9 @@ class ReservationTestTest extends TestCase
         $reservation = new Reservation($tickets);
 
         $reservation->cancel();
+
+        foreach ($tickets as $ticket) {
+            $ticket->shouldHaveReceived('release')->once();
+        }
     }
 }

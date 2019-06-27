@@ -239,4 +239,17 @@ class ConcertTest extends TestCase
 
         $this->fail('Was able to reserve tickets even though already reserved.');
     }
+
+    /**
+     * @test
+     */
+    function can_check_concert_has_order_for_customer_given_email()
+    {
+        $concert = factory(Concert::class)->create();
+        $concert->addTickets(5);
+
+        $concert->orderTickets('has@order.com', 3);
+
+        $this->assertTrue($concert->hasOrderFor('has@order.com'));
+    }
 }

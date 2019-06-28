@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Models\Concert;
 use App\Models\Reservation;
 use App\Models\Ticket;
 use Mockery;
@@ -10,6 +11,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class ReservationTestTest extends TestCase
 {
+    use RefreshDatabase;
     /**
      * @test
      */
@@ -82,5 +84,21 @@ class ReservationTestTest extends TestCase
 
         $this->assertEquals($tickets, $reservation->tickets());
         $this->assertEquals('hmm@tired.com', $reservation->email());
+    }
+
+    /**
+     * @test
+     */
+    function completing_a_reservation()
+    {
+        $concert = factory(Concert::class)->create(['ticket_price' => 1000]);
+        $tickets = factory(Ticket::class, 3)->create(['concert_id' => $concert->id]);
+        $reservation = new Reservation($tickets, 'getting@haha.com');
+
+        $order = $reservation->complete();
+
+        $this->assertEquals('getting@haha.com', $order->email);
+        $this->assertEquals(3, $order->ticket_quantity());
+        $this->assertEquals(3000, $order->amount);
     }
 }

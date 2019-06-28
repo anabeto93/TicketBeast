@@ -34,4 +34,12 @@ class Reservation
     {
         return $this->email;
     }
+
+    /**
+     * @return mixed
+     */
+    public function complete()
+    {
+        return Order::forTickets($this->tickets, $this->email, $this->totalCost());
+    }
 }

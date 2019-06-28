@@ -38,8 +38,10 @@ class Reservation
     /**
      * @return mixed
      */
-    public function complete()
+    public function complete($paymentGateway, $payment_token)
     {
+        $paymentGateway->charge($this->totalCost(), $payment_token);
+
         return Order::forTickets($this->tickets, $this->email, $this->totalCost());
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Billing\StripePaymentGateway;
 use App\Models\Concert;
 use App\Billing\FakePaymentGateway;
 use Tests\TestCase;
@@ -17,7 +18,7 @@ class StripePaymentGatewayTest extends TestCase
      */
     function charges_with_a_valid_token_are_successful()
     {
-        $paymentGateway = new StripPaymentGateway;
+        $paymentGateway = new StripePaymentGateway;
 
         $token = \Stripe\Token::create([
             'card' => [
@@ -28,9 +29,13 @@ class StripePaymentGatewayTest extends TestCase
             ]
         ], ['api_key' => config('services.stripe.secret')])->id;
 
-        $paymentGateway->charge(2500, $token);
+        $paymentGateway->charge(1500, $token);
 
-        $ch = \Stripe\Charge::retrieve($token, ['api_key' => config('services.stripe.secret')]);
-        
+        $lastCharge = \Stripe\Charge::all(['limit' => 1],
+            ['api_key' => config('services.stripe.secret')])['data'][0];
+
+        //dd($lastCharge);
+
+        $this->assertEquals(1500, $lastCharge->amount);
     }
 }

@@ -9,9 +9,21 @@ use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
+/**
+ * Class StripePaymentGatewayTest
+ * @package Tests\Feature
+ * @group integration
+ */
 class StripePaymentGatewayTest extends TestCase
 {
     use RefreshDatabase;
+    private $last_charge;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->last_charge = $this->lastCharge();
+    }
 
     private function lastCharge()
     {
@@ -31,17 +43,12 @@ class StripePaymentGatewayTest extends TestCase
         ], ['api_key' => config('services.stripe.secret')])->id;
     }
 
-    private function newCharges($last_charge)
+    private function newCharges()
     {
         return \Stripe\Charge::all([
             'limit' => 1,
-            'ending_before' => $last_charge->id],
+            'ending_before' => $this->last_charge->id],
             ['api_key' => config('services.stripe.secret')])['data'];
-    }
-
-    private function lastChargeAfter()
-    {
-
     }
 
     /**
@@ -49,13 +56,11 @@ class StripePaymentGatewayTest extends TestCase
      */
     function charges_with_a_valid_token_are_successful()
     {
-        $lastCharge = $this->lastCharge();
-
         $paymentGateway = new StripePaymentGateway;
 
         $paymentGateway->charge(2500, $this->validToken());
 
-        $this->assertCount(1, $this->newCharges($lastCharge));
+        $this->assertCount(1, $this->newCharges());
 
         $this->assertEquals(2500, $this->lastCharge()->amount);
     }

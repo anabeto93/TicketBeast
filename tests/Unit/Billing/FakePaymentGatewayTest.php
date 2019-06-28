@@ -48,8 +48,6 @@ class FakePaymentTest extends TestCase
      */
     function running_a_hook_before_the_first_charge()
     {
-        $this->disableExceptionHandling();
-
         $paymentGateway = new FakePaymentGateway;
 
         $timesCallbackRan = 0;

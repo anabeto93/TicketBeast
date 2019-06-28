@@ -64,4 +64,23 @@ class StripePaymentGatewayTest extends TestCase
 
         $this->assertEquals(2500, $this->lastCharge()->amount);
     }
+
+    /**
+     * @test
+     */
+    function charges_with_invalid_stripe_token_fails()
+    {
+        try{
+            $paymentGateway = new StripePaymentGateway;
+
+            $paymentGateway->charge(2500, 'hahaha-faked-token');
+        }catch(\App\Billing\PaymentFailedException $exception) {
+
+            $this->assertTrue(true);
+
+            return;
+        }
+
+        $this->fail('Charging with an invalid stripe token not throwing the PaymentFailedException');
+    }
 }

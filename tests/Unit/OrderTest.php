@@ -5,6 +5,8 @@ namespace Tests\Unit;
 use App\Exceptions\NotEnoughTicketsException;
 use App\Models\Concert;
 use App\Models\Order;
+use App\Models\Reservation;
+use App\Models\Ticket;
 use Carbon\Carbon;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -56,5 +58,21 @@ class OrderTest extends TestCase
         $this->assertEquals(10, $order->ticket_quantity());
         $this->assertEquals(22500, $order->amount);
         $this->assertEquals(5, $concert->remainingTickets());
+    }
+
+    /**
+     * @test
+     */
+    function creating_an_order_from_a_reservation()
+    {
+        $concert = factory(Concert::class)->create(['ticket_price' => 1500]);
+        $tickets = factory(Ticket::class, 2)->create(['concert_id' => $concert->id]);
+        $reservation = new Reservation($tickets, 'little@old.me');
+
+        $order = Order::fromReservation($reservation);
+
+        $this->assertEquals('little@old.me', $order->email);
+        $this->assertEquals(2, $order->ticket_quantity());
+        $this->assertEquals(3000, $order->amount);
     }
 }

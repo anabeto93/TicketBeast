@@ -23,6 +23,8 @@ class ConcertOrdersController extends Controller
 
     public function store($id) 
     {
+        Log::info('Request to create an order and reserve tickets ');
+        Log::debug(request()->all());
         $concert = Concert::published()->findOrFail($id);
 
         $this->validate(request(), [

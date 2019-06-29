@@ -56,7 +56,7 @@ class StripePaymentGatewayTest extends TestCase
      */
     function charges_with_a_valid_token_are_successful()
     {
-        $paymentGateway = new StripePaymentGateway;
+        $paymentGateway = new StripePaymentGateway(config('services.stripe.secret'));
 
         $paymentGateway->charge(2500, $this->validToken());
 
@@ -71,7 +71,7 @@ class StripePaymentGatewayTest extends TestCase
     function charges_with_invalid_stripe_token_fails()
     {
         try{
-            $paymentGateway = new StripePaymentGateway;
+            $paymentGateway = new StripePaymentGateway(config('services.stripe.secret'));
 
             $paymentGateway->charge(2500, 'hahaha-faked-token');
         }catch(\App\Billing\PaymentFailedException $exception) {

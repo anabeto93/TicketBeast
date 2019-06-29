@@ -16,4 +16,3 @@ mix.js('resources/js/app.js', 'public/js')
     .copy('resources/css/', 'public/a_css')
     .copy('resources/icons/', 'public/icons')
     .copy('resources/img/', 'public/img');
-    //.less('resources/less/app.less', 'public/css')

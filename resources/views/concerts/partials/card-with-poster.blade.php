@@ -4,7 +4,7 @@
             <div class="row flex-fit">
                 <div class="col col-lg-6 hidden-md-down p-xs-0 p-xs-l-4">
                     <div class="card-section">
-                        {{--<img src="{{ $concert->posterUrl() }}" class="img-fit" alt="">--}}
+                        <img src="{{ $concert->posterUrl() }}" class="img-fit" alt="">
                     </div>
                 </div>
                 <div class="col col-xs-12 col-lg-6">
@@ -16,7 +16,7 @@
                         <div class="m-xs-b-5">
                             <div class="media-object">
                                 <div class="media-left">
-                                    @svg('calendar')
+                                    @svg('calendar,['class' => 'small-svg'])
                                 </div>
                                 <div class="media-body p-xs-l-2">
                                     <span class="wt-medium">{{ $concert->formatted_date }}</span>
@@ -26,7 +26,7 @@
                         <div class="m-xs-b-5">
                             <div class="media-object">
                                 <div class="media-left">
-                                    @svg('time')
+                                    @svg('time,['class' => 'small-svg'])
                                 </div>
                                 <div class="media-body p-xs-l-2">
                                     <span class="wt-medium block">Doors at {{ $concert->formatted_start_time }}</span>
@@ -36,7 +36,7 @@
                         <div class="m-xs-b-5">
                             <div class="media-object">
                                 <div class="media-left">
-                                    @svg('currency-dollar')
+                                    @svg('currency-dollar,['class' => 'small-svg'])
                                 </div>
                                 <div class="media-body p-xs-l-2">
                                     <span class="wt-medium block">{{ $concert->ticket_price_in_dollars }}</span>
@@ -46,7 +46,7 @@
                         <div class="text-dark-soft m-xs-b-5">
                             <div class="media-object">
                                 <div class="media-left">
-                                    @svg('location')
+                                    @svg('location,['class' => 'small-svg'])
                                 </div>
                                 <div class="media-body p-xs-l-2">
                                     <h3 class="text-base wt-medium text-dark">{{ $concert->venue }}</h3>
@@ -58,7 +58,7 @@
                         <div class="text-dark-soft">
                             <div class="media-object">
                                 <div class="media-left">
-                                    @svg('information-solid')
+                                    @svg('information-solid,['class' => 'small-svg'])
                                 </div>
                                 <div class="media-body p-xs-l-2">
                                     <h3 class="text-base wt-medium text-dark">Additional Information</h3>

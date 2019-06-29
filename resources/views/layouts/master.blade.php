@@ -15,8 +15,15 @@
     @yield('body')
 </div>
 
+<style>
+    .small-svg {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+</style>
 @stack('beforeScripts')
 <script src="{{ asset('js/app.js') }}"></script>
 @stack('afterScripts')
+{{ svg_spritesheet() }}
 </body>
 </html>

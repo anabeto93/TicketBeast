@@ -24,7 +24,7 @@
             {{--@endif--}}
             @include('concerts.partials.card-no-poster', ['concert' => $concert])
             <div class="text-center text-dark-soft wt-medium">
-                <p>Powered by TicketBeast</p>
+                <p>Powered by <a href="https://richardopoku.com">Humvite Tech Solutions</a> </p>
             </div>
         </div>
     </div>

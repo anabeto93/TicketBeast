@@ -1,0 +1,3 @@
+#!/bin/bash
+
+docker exec -it ticket-admin sh -c "/bin/sh"

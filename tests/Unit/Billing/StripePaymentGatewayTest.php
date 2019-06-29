@@ -36,18 +36,6 @@ class StripePaymentGatewayTest extends TestCase
             ['api_key' => config('services.stripe.secret')])['data'][0];
     }
 
-    private function validToken()
-    {
-        return \Stripe\Token::create([
-            'card' => [
-                'number' => '4242424242424242',
-                'exp_month' => 6,
-                'exp_year' => date('Y') + 1,
-                'cvc' => '123'
-            ]
-        ], ['api_key' => config('services.stripe.secret')])->id;
-    }
-
     private function newCharges()
     {
         return \Stripe\Charge::all([
@@ -63,11 +51,20 @@ class StripePaymentGatewayTest extends TestCase
     {
         $paymentGateway = $this->getPaymentGateway();
 
-        $paymentGateway->charge(2500, $this->validToken());
+        $charge = $paymentGateway->lastCharge();
+
+        $newCharges = $paymentGateway->newChargesDuring(function() use($paymentGateway) {
+            $paymentGateway->charge(2500, $paymentGateway->getValidTestToken());
+        });
+
+        $this->assertCount(1, $newCharges);
+        $this->assertEquals(2500, $newCharges->sum());
+
+        /*$paymentGateway->charge(2500, $paymentGateway->getValidTestToken());
 
         $this->assertCount(1, $this->newCharges());
 
-        $this->assertEquals(2500, $this->lastCharge()->amount);
+        $this->assertEquals(2500, $this->lastCharge()->amount);*/
     }
 
     /**

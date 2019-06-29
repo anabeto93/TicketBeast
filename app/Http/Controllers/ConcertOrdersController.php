@@ -18,13 +18,10 @@ class ConcertOrdersController extends Controller
     public function __construct(PaymentGateway $gateway)
     {
         $this->paymentGateway = $gateway;
-        //Log::info('Constructor has been called to do the binding');
     }
 
     public function store($id) 
     {
-        Log::info('Request to create an order and reserve tickets ');
-        Log::debug(request()->all());
         $concert = Concert::published()->findOrFail($id);
 
         $this->validate(request(), [

@@ -9,9 +9,9 @@ class StripePaymentGateway implements PaymentGateway
 {
     private $api_key;
 
-    public function __construct($api_key)
+    public function __construct()
     {
-        $this->api_key = $api_key === null ? config('services.stripe.secret') : $api_key;
+        $this->api_key = config('services.stripe.secret');
     }
 
     public function charge($amount, $token)

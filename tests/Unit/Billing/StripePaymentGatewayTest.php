@@ -25,6 +25,11 @@ class StripePaymentGatewayTest extends TestCase
         $this->last_charge = $this->lastCharge();
     }
 
+    protected function getPaymentGateway()
+    {
+        return new StripePaymentGateway();
+    }
+
     private function lastCharge()
     {
         return \Stripe\Charge::all(['limit' => 1],
@@ -56,7 +61,7 @@ class StripePaymentGatewayTest extends TestCase
      */
     function charges_with_a_valid_token_are_successful()
     {
-        $paymentGateway = new StripePaymentGateway(config('services.stripe.secret'));
+        $paymentGateway = $this->getPaymentGateway();
 
         $paymentGateway->charge(2500, $this->validToken());
 
@@ -71,7 +76,7 @@ class StripePaymentGatewayTest extends TestCase
     function charges_with_invalid_stripe_token_fails()
     {
         try{
-            $paymentGateway = new StripePaymentGateway(config('services.stripe.secret'));
+            $paymentGateway = $this->getPaymentGateway();
 
             $paymentGateway->charge(2500, 'hahaha-faked-token');
         }catch(\App\Billing\PaymentFailedException $exception) {

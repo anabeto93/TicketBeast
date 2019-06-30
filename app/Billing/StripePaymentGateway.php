@@ -24,16 +24,21 @@ class StripePaymentGateway implements PaymentGateway
                 "source" => $token, // obtained with Stripe.js
                 "description" => "Charge for richard@humvite.com"
             ],['api_key' => $this->api_key]);
+
+            return new \App\Billing\Charge([
+                'amount' => $charge['amount'],
+                'card_last_four' => $charge['payment_method_details']['card']['last4'],
+            ]);
         }catch(InvalidRequest $e) {
             throw new PaymentFailedException;
         }
     }
 
-    public function getValidTestToken()
+    public function getValidTestToken($card_number = '4242424242424242')
     {
         return Token::create([
             'card' => [
-                'number' => '4242424242424242',
+                'number' => $card_number,
                 'exp_month' => 6,
                 'exp_year' => date('Y') + 1,
                 'cvc' => '123'
@@ -53,8 +58,14 @@ class StripePaymentGateway implements PaymentGateway
 
         $callback($this);
 
-        return $this->newChargesSince($last_charge)
-            ->pluck('amount')->values();
+        return $this->newChargesSince($last_charge)->map(
+            function($charge) {
+                return new \App\Billing\Charge([
+                    'amount' => $charge['amount'],
+                    'card_last_four' => $charge['payment_method_details']['card']['last4'],
+                ]);
+            }
+        );
     }
 
     public function newChargesSince($last_charge = null)

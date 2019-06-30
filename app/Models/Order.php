@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Repositories\Order\OrderConfirmationNumberGeneratorContract as OrderConfirmationNumberGenerator;
+use App\Facades\OrderConfirmationNumberGenerator;
 use Illuminate\Database\Eloquent\Model;
 
 
@@ -38,10 +38,9 @@ class Order extends Model
     public static function forTickets($tickets, $email, $amount)
     {
         $order = self::create([
-            'confirmation_number' => app(OrderConfirmationNumberGenerator::class)->generate(),
+            'confirmation_number' => OrderConfirmationNumberGenerator::generate(),
             'email' => $email,
             'amount' => $amount,
-            //ticket prices can vary, add them individually if no amount supplied
         ]);
 
         foreach($tickets as $ticket) {

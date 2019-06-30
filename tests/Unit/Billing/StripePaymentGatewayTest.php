@@ -17,12 +17,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 class StripePaymentGatewayTest extends TestCase
 {
     use RefreshDatabase;
-    private $last_charge;
 
     public function setUp(): void
     {
         parent::setUp();
-        $this->last_charge = $this->lastCharge();
     }
 
     protected function getPaymentGateway()
@@ -30,18 +28,23 @@ class StripePaymentGatewayTest extends TestCase
         return new StripePaymentGateway();
     }
 
-    private function lastCharge()
+    /**
+     * @test
+     */
+    function can_fetch_charges_created_during_a_callback()
     {
-        return \Stripe\Charge::all(['limit' => 1],
-            ['api_key' => config('services.stripe.secret')])['data'][0];
-    }
+        $paymentGateway = $this->getPaymentGateway();
+        $paymentGateway->charge(1000, $paymentGateway->getValidTestToken());
+        $paymentGateway->charge(1500, $paymentGateway->getValidTestToken());
+        $paymentGateway->charge(2500, $paymentGateway->getValidTestToken());
 
-    private function newCharges()
-    {
-        return \Stripe\Charge::all([
-            'limit' => 1,
-            'ending_before' => $this->last_charge->id],
-            ['api_key' => config('services.stripe.secret')])['data'];
+        $newCharges = $paymentGateway->newChargesDuring(function ($paymentGateway) {
+            $paymentGateway->charge(700, $paymentGateway->getValidTestToken());
+            $paymentGateway->charge(800, $paymentGateway->getValidTestToken());
+        });
+
+        $this->assertCount(2, $newCharges);
+        $this->assertEquals([700, 800], $newCharges->all());
     }
 
     /**
@@ -53,18 +56,12 @@ class StripePaymentGatewayTest extends TestCase
 
         $charge = $paymentGateway->lastCharge();
 
-        $newCharges = $paymentGateway->newChargesDuring(function() use($paymentGateway) {
+        $newCharges = $paymentGateway->newChargesDuring(function($paymentGateway) {
             $paymentGateway->charge(2500, $paymentGateway->getValidTestToken());
         });
 
         $this->assertCount(1, $newCharges);
         $this->assertEquals(2500, $newCharges->sum());
-
-        /*$paymentGateway->charge(2500, $paymentGateway->getValidTestToken());
-
-        $this->assertCount(1, $this->newCharges());
-
-        $this->assertEquals(2500, $this->lastCharge()->amount);*/
     }
 
     /**

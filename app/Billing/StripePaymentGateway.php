@@ -22,7 +22,7 @@ class StripePaymentGateway implements PaymentGateway
                 "amount" => $amount,
                 "currency" => "usd",
                 "source" => $token, // obtained with Stripe.js
-                "description" => "Charge for jenny.rosen@example.com"
+                "description" => "Charge for richard@humvite.com"
             ],['api_key' => $this->api_key]);
         }catch(InvalidRequest $e) {
             throw new PaymentFailedException;
@@ -51,18 +51,18 @@ class StripePaymentGateway implements PaymentGateway
     {
         $last_charge = $this->lastCharge();
 
-        $callback();
+        $callback($this);
 
-        return $this->newChargesSince($last_charge)->pluck('amount');
+        return $this->newChargesSince($last_charge)
+            ->pluck('amount')->reverse()->values();
     }
 
     public function newChargesSince($last_charge = null)
     {
         $new_charges = Charge::all([
-            'limit' => 1,
             'ending_before' => $last_charge ? $last_charge->id : null],
             ['api_key' => $this->api_key ])['data'];
-        
+
         return collect($new_charges);
     }
 }

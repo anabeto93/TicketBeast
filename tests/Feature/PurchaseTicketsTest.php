@@ -6,6 +6,8 @@ use App\Http\Middleware\VerifyCsrfToken;
 use App\Models\Concert;
 use App\Billing\FakePaymentGateway;
 use App\Billing\PaymentGateway;
+use App\Repositories\Order\OrderConfirmationNumberGeneratorRepository as OrderConfirmationNumberGenerator;
+use Mockery;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -52,6 +54,12 @@ class PurchaseTicketsTest extends TestCase
      */
     function customer_can_purchase_published_concert_tickets()
     {
+        $this->disableExceptionHandling();
+
+        $orderConfirmationGenerator = Mockery::mock(OrderConfirmationNumberGenerator::class, [
+            'generate' => 'BMNJXHVRAS5EGXJPJMZ8XW88'//always return this when called
+        ]);
+        $this->app->instance(OrderConfirmationNumberGenerator::class, $orderConfirmationGenerator);
         // Arrange
         $concert = factory(Concert::class)->state('published')->create([
             'ticket_price' => 1599
@@ -69,7 +77,8 @@ class PurchaseTicketsTest extends TestCase
         $response->assertStatus(201);
 
         //assert against the expected response if it has been created
-        $response->assertJson( [
+        $response->assertJson([
+                "confirmation_number" => "BMNJXHVRAS5EGXJPJMZ8XW88",
                 "email" => "test@admin.com",
                 "ticket_quantity" => 2,
                 "amount" => 3198,

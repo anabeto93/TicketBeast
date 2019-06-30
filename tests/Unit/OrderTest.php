@@ -9,6 +9,7 @@ use App\Models\Reservation;
 use App\Models\Ticket;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Mockery;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -21,19 +22,20 @@ class OrderTest extends TestCase
      */
     function convert_order_to_array_works()
     {
-        //$this->disableExceptionHandling();
-
-        $concert = factory(Concert::class)->create([
-            'ticket_price' => 100
+        $order = factory(Order::class)->create([
+            'email' => 'array@order.com',
+            'amount' => 600,
+            'confirmation_number' => 'BMNJXHVRAS5EGXJPJMZ8XW88',
         ]);
 
-        $concert->addTickets(10);
-
-        $order = $concert->orderTickets('array@order.com', 6);
+        $tickets = $order->tickets()->saveMany(
+            factory(Ticket::class, 6)->create()
+        );
 
         $result = $order->toArray();
 
         $this->assertEquals([
+            'confirmation_number' => 'BMNJXHVRAS5EGXJPJMZ8XW88',
             'email' => 'array@order.com',
             'ticket_quantity' => 6,
             'amount' => 600 //100 * 6

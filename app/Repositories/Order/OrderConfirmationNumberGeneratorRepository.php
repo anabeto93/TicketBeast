@@ -10,6 +10,8 @@ class OrderConfirmationNumberGeneratorRepository implements OrderConfirmationNum
      */
     public function generate()
     {
-        // TODO: Implement generate() method.
+        $pool = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+
+        return substr(str_shuffle(str_repeat($pool, 24)), 0, 24);
     }
 }

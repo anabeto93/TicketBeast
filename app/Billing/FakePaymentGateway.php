@@ -8,6 +8,7 @@ use App\Billing\Charge;
 
 class FakePaymentGateway implements PaymentGateway
 {
+    const TEST_CARD_NUMBER = '5555555555551881';
     private $charges;
     private $tokens;
     private $beforeFirstChargeCallback;
@@ -18,7 +19,7 @@ class FakePaymentGateway implements PaymentGateway
         $this->tokens = collect();
     }
 
-    public function getValidTestToken($card_number = '4242424242424242')
+    public function getValidTestToken($card_number = self::TEST_CARD_NUMBER)
     {
         $temp = 'fake-tok_'.str_random(24);
         $this->tokens[$temp] = $card_number;

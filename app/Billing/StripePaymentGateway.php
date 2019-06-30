@@ -8,6 +8,7 @@ use Stripe\Token;
 
 class StripePaymentGateway implements PaymentGateway
 {
+    const TEST_CARD_NUMBER = '5555555555554444';
     private $api_key;
 
     public function __construct()
@@ -34,7 +35,7 @@ class StripePaymentGateway implements PaymentGateway
         }
     }
 
-    public function getValidTestToken($card_number = '4242424242424242')
+    public function getValidTestToken($card_number = self::TEST_CARD_NUMBER)
     {
         return Token::create([
             'card' => [

@@ -2,7 +2,6 @@
 
 namespace Tests\Unit\Billing;
 
-use App\Models\Concert;
 use App\Billing\FakePaymentGateway;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;

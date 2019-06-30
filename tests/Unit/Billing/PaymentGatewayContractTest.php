@@ -2,8 +2,14 @@
 
 namespace Tests\Unit\Billing;
 
+use App\Billing\PaymentFailedException;
+use App\Billing\PaymentGateway;
+
 trait PaymentGatewayContractTest
 {
+    /**
+     * @return PaymentGateway
+     */
     abstract protected function getPaymentGateway();
 
     /**
@@ -22,7 +28,7 @@ trait PaymentGatewayContractTest
         });
 
         $this->assertCount(2, $newCharges);
-        $this->assertEquals([3000, 5000], $newCharges->all());
+        $this->assertEquals([5000, 3000], $newCharges->all());
     }
 
     /**
@@ -47,17 +53,19 @@ trait PaymentGatewayContractTest
      */
     function charges_with_invalid_payment_token_fails()
     {
-        try{
-            $paymentGateway = $this->getPaymentGateway();
+        $paymentGateway = $this->getPaymentGateway();
 
-            $paymentGateway->charge(2500, 'hahaha-faked-token');
-        }catch(\App\Billing\PaymentFailedException $exception) {
+        $newCharges = $paymentGateway->newChargesDuring(function($paymentGateway) {
+            try{
+                $paymentGateway->charge(2500, 'hahaha-faked-token');
+            }catch(PaymentFailedException $exception) {
 
-            $this->assertTrue(true);
+                return;
+            }
 
-            return;
-        }
+            $this->fail('Charging with an invalid stripe token not throwing the PaymentFailedException');
+        });
 
-        $this->fail('Charging with an invalid stripe token not throwing the PaymentFailedException');
+        $this->assertCount(0, $newCharges);
     }
 }

@@ -3,8 +3,6 @@
 namespace Tests\Unit\Billing;
 
 use App\Billing\StripePaymentGateway;
-use App\Models\Concert;
-use App\Billing\FakePaymentGateway;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -17,11 +15,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 class StripePaymentGatewayTest extends TestCase
 {
     use RefreshDatabase, PaymentGatewayContractTest;
-
-    public function setUp(): void
-    {
-        parent::setUp();
-    }
 
     protected function getPaymentGateway()
     {

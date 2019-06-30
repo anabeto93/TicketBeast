@@ -54,7 +54,7 @@ class StripePaymentGateway implements PaymentGateway
         $callback($this);
 
         return $this->newChargesSince($last_charge)
-            ->pluck('amount')->reverse()->values();
+            ->pluck('amount')->values();
     }
 
     public function newChargesSince($last_charge = null)

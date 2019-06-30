@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Models\Concert;
+use App\Models\Order;
 use App\Models\Ticket;
 use Carbon\Carbon;
 use Tests\TestCase;
@@ -37,5 +38,24 @@ class TicketTest extends TestCase
         $ticket->reserve();
 
         $this->assertNotNull($ticket->fresh()->reserved_at);
+    }
+
+    /**
+     * @test
+     */
+    function can_get_order_from_ticket()
+    {
+        $order = factory(Order::class)->create([
+            'confirmation_number' => 'FAKETICKET1234',
+            'card_last_four' => '8585'
+        ]);
+        $ticket = factory(Ticket::class)->create([
+            'order_id' => $order->id,
+            'code' => 'OHCOMEON'
+        ]);
+
+        $found = $ticket->order;
+
+        $this->assertEquals($order->id, $found->id);
     }
 }

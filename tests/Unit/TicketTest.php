@@ -5,6 +5,7 @@ namespace Tests\Unit;
 use App\Models\Concert;
 use App\Models\Order;
 use App\Models\Ticket;
+use App\Facades\TicketCode;
 use Carbon\Carbon;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -57,5 +58,23 @@ class TicketTest extends TestCase
         $found = $ticket->order;
 
         $this->assertEquals($order->id, $found->id);
+    }
+
+    /**
+     * @test
+     */
+    function can_claim_a_ticket_for_an_order()
+    {
+        $order = factory(Order::class)->create();
+        $ticket = factory(Ticket::class)->create(['code' => null]);
+
+        TicketCode::shouldReceive('generateFor')->once()->with($ticket)->andReturn('TICKETCODE1');
+
+        $ticket->claimFor($order);
+
+        // Assert that the ticket is saved to the order
+        $this->assertContains($ticket->id, $order->tickets->pluck('id'));
+        // Assert that the ticket had the expected ticket code generated
+        $this->assertEquals('TICKETCODE1', $ticket->code);
     }
 }

@@ -27,5 +27,10 @@ class AccessServiceProvider extends ServiceProvider
             \App\Repositories\Order\OrderConfirmationNumberGeneratorContract::class,
             \App\Repositories\Order\OrderConfirmationNumberGeneratorRepository::class
         );
+
+        $this->app->bind(
+            \App\Repositories\Ticket\TicketCodeGeneratorContract::class,
+            \App\Repositories\Ticket\TicketCodeGeneratorRepository::class
+        );
     }
 }

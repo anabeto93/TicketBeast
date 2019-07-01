@@ -45,22 +45,18 @@ class OrderTest extends TestCase
     /**
      * @test
      */
-    function can_create_order_given_tickets_email_and_amount()
+    function can_create_order_given_tickets_email_and_charge()
     {
-        $concert = factory(Concert::class)->create();
+        $tickets = factory(Ticket::class, 5)->create();
+        $charge = new \App\Billing\Charge(['amount' => 22500, 'card_last_four' => '1234']);
 
-        $concert->addTickets(15);
-
-        $this->assertEquals(15, $concert->remainingTickets());
-
-        $order = Order::forTickets($concert->findTickets(10),
-            'order@tickets.com', 22500);
+        $order = Order::forTickets($tickets, 'order@tickets.com', $charge);
 
         $this->assertEquals('order@tickets.com', $order->email);
 
-        $this->assertEquals(10, $order->ticket_quantity());
+        $this->assertEquals(5, $order->ticket_quantity());
         $this->assertEquals(22500, $order->amount);
-        $this->assertEquals(5, $concert->remainingTickets());
+        $this->assertEquals('1234', $order->card_last_four);
     }
 
     /**

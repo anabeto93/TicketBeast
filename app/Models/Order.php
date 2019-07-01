@@ -35,12 +35,13 @@ class Order extends Model
         ];
     }
 
-    public static function forTickets($tickets, $email, $amount)
+    public static function forTickets($tickets, $email, \App\Billing\Charge $charge)
     {
         $order = self::create([
             'confirmation_number' => OrderConfirmationNumberGenerator::generate(),
             'email' => $email,
-            'amount' => $amount,
+            'amount' => $charge->amount(),
+            'card_last_four' => $charge->cardLastFour(),
         ]);
 
         foreach($tickets as $ticket) {

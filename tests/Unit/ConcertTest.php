@@ -4,7 +4,9 @@ namespace Tests\Unit;
 
 use App\Exceptions\NotEnoughTicketsException;
 use App\Models\Concert;
+use App\Models\Order;
 use App\Models\Reservation;
+use App\Models\Ticket;
 use Carbon\Carbon;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -76,22 +78,6 @@ class ConcertTest extends TestCase
     /**
      * @test
      */
-    function can_order_concert_tickets()
-    {
-        $concert = factory(Concert::class)->create();
-
-        //create some tickets
-        $concert->addTickets(5);
-
-        $order = $concert->orderTickets('me@admin.com', 5);//order 5 tickets
-
-        $this->assertEquals('me@admin.com', $order->email);
-        $this->assertEquals(5, $order->tickets()->count());
-    }
-
-    /**
-     * @test
-     */
     function can_add_tickets_to_concert()
     {
         $concert = factory(Concert::class)->create();
@@ -108,35 +94,15 @@ class ConcertTest extends TestCase
     {
         $concert = factory(Concert::class)->create();
 
-        $concert->addTickets(27);
+        $concert->tickets()->saveMany(factory(Ticket::class, 5)->create([
+            'order_id' => 1
+        ]));
 
-        $concert->orderTickets('babe@hanao.com', 15);//leaving 12 basically
+        $concert->tickets()->saveMany(factory(Ticket::class, 12)->create([
+            'order_id' => null
+        ]));
 
         $this->assertEquals(12, $concert->remainingTickets());
-    }
-
-    /**
-     * @test
-     */
-    function trying_to_purchase_more_tickets_than_remaining_throws_exception()
-    {
-        $concert = factory(Concert::class)->create();
-
-        $concert->addTickets(27);
-
-        try {
-            $concert->orderTickets('oioi@sanji.com', 30);//2 more than available
-        } catch(NotEnoughTicketsException $e) {
-            $order = $concert->orders()->where('email','oioi@sanji.com')->first();
-
-            $this->assertNull($order);
-
-            $this->assertEquals(27, $concert->remainingTickets());
-
-            return;
-        }
-
-        $this->fail('Order succeeded even when there were not enough tickets remaining');
     }
 
     /**
@@ -149,10 +115,17 @@ class ConcertTest extends TestCase
         $concert->addTickets(7);
 
         //first person to purchase tickets
-        $concert->orderTickets('first@mate.com', 5);//remaining 2
+        $order = factory(Order::class)->create([
+            'email' => 'first@mate.com'
+        ]);
+
+        $this->assertEquals(7, $concert->remainingTickets());
+
+        $order->tickets()->saveMany($concert->tickets->take(5));//remaining two
+        $order->tickets()->update(['reserved_at' => Carbon::now()]);//truly reserved
 
         try{
-            $concert->orderTickets('second@person.com', 3);//1 more than available
+            $concert->reserveTickets(5, 'second@person.com');//1 more than available
         }catch (NotEnoughTicketsException $e) {
             $secondOrder = $concert->orders()->where('email','second@person.com')->first();
             $firstOrder = $concert->orders()->where('email','first@mate.com')->first();
@@ -225,7 +198,14 @@ class ConcertTest extends TestCase
         $concert = factory(Concert::class)->create();
         $concert->addTickets(5);
 
-        $concert->orderTickets('rich@main.com', 3);
+        $order = factory(Order::class)->create([
+            'email' => 'rich@main.com'
+        ]);
+
+        $this->assertEquals(5, $concert->remainingTickets());
+
+        $order->tickets()->saveMany($concert->tickets->take(3));//remaining two
+        $order->tickets()->update(['reserved_at' => Carbon::now()]);
 
         try {
             $concert->reserveTickets(4,'greedy@main.com');//meanwhile only 2 left
@@ -267,7 +247,14 @@ class ConcertTest extends TestCase
         $concert = factory(Concert::class)->create();
         $concert->addTickets(2);
 
-        $concert->orderTickets('has@order.com', 1);
+        $order = factory(Order::class)->create([
+            'email' => 'has@order.com'
+        ]);
+
+        $this->assertEquals(2, $concert->remainingTickets());
+
+        $order->tickets()->saveMany($concert->tickets->take(1));//remaining one
+        $order->tickets()->update(['reserved_at' => Carbon::now()]);
 
         $this->assertTrue($concert->hasOrderFor('has@order.com'));
     }

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Billing\PaymentGateway;
+
 class Reservation
 {
     private $tickets;
@@ -36,12 +38,15 @@ class Reservation
     }
 
     /**
-     * @return mixed
+     * Complete a reservation by charging and then creating an order
+     * @param PaymentGateway $paymentGateway
+     * @param string $payment_token
+     * @return Order
      */
-    public function complete($paymentGateway, $payment_token)
+    public function complete(PaymentGateway $paymentGateway, $payment_token)
     {
-        $paymentGateway->charge($this->totalCost(), $payment_token);
+        $charge = $paymentGateway->charge($this->totalCost(), $payment_token);
 
-        return Order::forTickets($this->tickets, $this->email, $this->totalCost());
+        return Order::forTickets($this->tickets, $this->email, $charge);
     }
 }

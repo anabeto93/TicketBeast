@@ -36,7 +36,7 @@
                                     <div class="col-sm">
                                         <div class="media-object">
                                             <div class="media-left">
-                                                @icon('calendar', 'text-brand-muted')
+                                                @svg('calendar', 'text-brand-muted small-svg')
                                             </div>
                                             <div class="media-body p-xs-l-4">
                                                 <p class="wt-bold">
@@ -51,7 +51,7 @@
                                     <div class="col-sm">
                                         <div class="media-object">
                                             <div class="media-left">
-                                                @icon('location', 'text-brand-muted')
+                                                @svg('location', 'text-brand-muted small-svg')
                                             </div>
                                             <div class="media-body p-xs-l-4">
                                                 <p class="wt-bold">{{ $ticket->concert->venue }}</p>

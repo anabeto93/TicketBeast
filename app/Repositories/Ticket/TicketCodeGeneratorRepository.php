@@ -10,9 +10,13 @@ class TicketCodeGeneratorRepository implements TicketCodeGeneratorContract
 {
     private $hashids;
 
-    public function __construct($salt)
+    public function __construct($salt = null)
     {
-        Log::info('Has not been called', ['salt' => $salt]);
+        if($salt===null) {
+            $salt = config('hashids.salt');
+            Log::info('Default HashIds', ['hash' => config('hasids')]);
+        }
+
         $this->hashids = new Hashids($salt, 6, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ');
     }
 

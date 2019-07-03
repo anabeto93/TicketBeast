@@ -6,6 +6,7 @@ use App\Http\Middleware\VerifyCsrfToken;
 use App\Models\Concert;
 use App\Billing\FakePaymentGateway;
 use App\Billing\PaymentGateway;
+use App\Models\Order;
 use App\Repositories\Order\OrderConfirmationNumberGeneratorRepository as OrderConfirmationNumberGenerator;
 use Mockery;
 use Tests\TestCase;
@@ -23,8 +24,6 @@ class PurchaseTicketsTest extends TestCase
         parent::setUp();
 
         $this->paymentGateway = new FakePaymentGateway();
-
-        //$this->withoutMiddleware([VerifyCsrfToken::class]);
 
         $this->app->instance(PaymentGateway::class, $this->paymentGateway);
     }
@@ -54,8 +53,6 @@ class PurchaseTicketsTest extends TestCase
      */
     function customer_can_purchase_published_concert_tickets()
     {
-        $this->disableExceptionHandling();
-
         $orderConfirmationGenerator = Mockery::mock(OrderConfirmationNumberGenerator::class, [
             'generate' => 'BMNJXHVRAS5EGXJPJMZ8XW88'//always return this when called
         ]);
@@ -259,8 +256,6 @@ class PurchaseTicketsTest extends TestCase
      */
     function cannot_purchase_tickets_another_has_reserved()
     {
-        $this->disableExceptionHandling();
-
         $concert = factory(Concert::class)->state('published')->create([
             'ticket_price' => 1500
         ]);
@@ -308,5 +303,45 @@ class PurchaseTicketsTest extends TestCase
         $this->assertNotNull($order);
 
         $this->assertEquals(3, $order->tickets()->count());
+    }
+
+    /**
+     * @test
+     */
+    function ticket_codes_are_generated_and_stored_in_db_when_they_are_purchased()
+    {
+        $orderConfirmationGenerator = Mockery::mock(OrderConfirmationNumberGenerator::class, [
+            'generate' => 'BMNJXHVRAS5EGXJPJMZ8XW88'//always return this when called
+        ]);
+        $this->app->instance(OrderConfirmationNumberGenerator::class, $orderConfirmationGenerator);
+        // Arrange
+        $concert = factory(Concert::class)->state('published')->create([
+            'ticket_price' => 1599
+        ]);
+
+        $concert->addTickets(2); //more than the 2 that will be bought
+
+        $response = $this->orderTickets($concert, [
+            'email' => 'test@admin.com',
+            'ticket_quantity' => 2,
+            'payment_token' => $this->paymentGateway->getValidTestToken(),
+        ]);
+
+        //Assert that ticket has been created
+        $response->assertStatus(201);
+
+        //assert against the expected response if it has been created
+        $response->assertJson([
+            "confirmation_number" => "BMNJXHVRAS5EGXJPJMZ8XW88",
+            "email" => "test@admin.com",
+            "ticket_quantity" => 2,
+            "amount" => 3198,
+        ]);
+
+        $tickets = Order::where('confirmation_number', 'BMNJXHVRAS5EGXJPJMZ8XW88')->first()->tickets;
+
+        foreach($tickets as $ticket) {
+            $this->assertNotNull($ticket->code);
+        }
     }
 }

@@ -3,9 +3,9 @@
 namespace Tests\Unit;
 
 
+use App\Facades\TicketCode;
 use App\Models\Ticket;
 use App\Repositories\Ticket\TicketCodeGeneratorRepository;
-use Carbon\Carbon;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -14,10 +14,8 @@ class TicketCodeGeneratorTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
-    public function ticket_codes_are_at_least_six_characters_long()
+    function ticket_codes_are_at_least_six_characters_long()
     {
-        $this->disableExceptionHandling();
-
         $ticketCodeGenerator = new TicketCodeGeneratorRepository('testsalt');
 
 
@@ -27,7 +25,7 @@ class TicketCodeGeneratorTest extends TestCase
     }
 
     /** @test */
-    public function ticket_codes_can_only_contain_uppercase_letters()
+    function ticket_codes_can_only_contain_uppercase_letters()
     {
         $ticketCodeGenerator = new TicketCodeGeneratorRepository('testsalt');
 
@@ -37,7 +35,7 @@ class TicketCodeGeneratorTest extends TestCase
     }
 
     /** @test */
-    public function ticket_codes_for_the_same_ticket_ids_are_the_same()
+    function ticket_codes_for_the_same_ticket_ids_are_the_same()
     {
         $ticketCodeGenerator = new TicketCodeGeneratorRepository('testsalt');
 
@@ -48,7 +46,7 @@ class TicketCodeGeneratorTest extends TestCase
     }
 
     /** @test */
-    public function ticket_codes_for_the_diffent_ticket_ids_are_the_different()
+    function ticket_codes_for_the_different_ticket_ids_are_different()
     {
         $ticketCodeGenerator = new TicketCodeGeneratorRepository('testsalt');
 
@@ -59,7 +57,7 @@ class TicketCodeGeneratorTest extends TestCase
     }
 
     /** @test */
-    public function ticket_codes_generated_with_different_salts_are_different()
+    function ticket_codes_generated_with_different_salts_for_same_ticket_are_different()
     {
         $ticketCodeGenerator1 = new TicketCodeGeneratorRepository('testsalt1');
         $ticketCodeGenerator2 = new TicketCodeGeneratorRepository('testsalt2');
@@ -68,5 +66,22 @@ class TicketCodeGeneratorTest extends TestCase
         $code2 = $ticketCodeGenerator2->generateFor(new Ticket(['id' => 1]));
 
         $this->assertNotEquals($code1, $code2);
+    }
+    
+    /**
+     * @test
+     */
+    function ticket_codes_generated_are_stored_in_db()
+    {
+        $order = factory(\App\Models\Order::class)->create();
+        $ticket = factory(Ticket::class)->create(['code' => null]);
+
+        TicketCode::shouldReceive('generateFor')->once()->with($ticket)->andReturn('TICKETCODE1');
+
+        $ticket->claimFor($order);
+
+        $this->assertDatabaseHas('tickets', [
+           'code' => 'TICKETCODE1'
+        ]);
     }
 }
